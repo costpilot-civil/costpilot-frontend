@@ -79,3 +79,23 @@
   .page { gap: 20px; }
   .pageHeader { flex-wrap: wrap; }
 }
+
+.backButton {
+  width: fit-content;
+  margin-bottom: 14px;
+  padding-left: 0;
+  padding-right: 10px;
+
+  color: var(--cp-blue-strong);
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  background: transparent;
+  border: none;
+}
+
+.backButton:hover {
+  color: #007acc;
+  background: transparent;
+  text-decoration: underline;
+}

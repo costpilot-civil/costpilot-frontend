@@ -7,9 +7,34 @@ import ProjectsPage from "./pages/projects-page";
 import SettingsPage from "./pages/settings-page";
 import ProjectDetailPage from "./pages/project-detail-page";
 
+type ReturnPage = "dashboard" | "projects";
+
 function App() {
   const [activePage, setActivePage] = useState("dashboard");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+
+  const [returnPage, setReturnPage] = useState<ReturnPage>("dashboard");
+
+  function openProjectRegistration() {
+    if (activePage === "dashboard" || activePage === "projects") {
+      setReturnPage(activePage);
+    }
+
+    setActivePage("project-registration");
+  }
+
+  function openProjectDetail(projectId: string) {
+    if (activePage === "dashboard" || activePage === "projects") {
+      setReturnPage(activePage);
+    }
+
+    setCurrentProjectId(projectId);
+    setActivePage("project-detail");
+  }
+
+  function goBack() {
+    setActivePage(returnPage);
+  }
 
   function renderPage() {
     switch (activePage) {
@@ -19,8 +44,12 @@ function App() {
       case "project-registration":
         return (
           <ProjectRegistrationPage
-            onCancel={() => setActivePage("dashboard")}
-            onCreated={() => setActivePage("project-detail")}
+            backTo={returnPage}
+            onCancel={goBack}
+            onCreated={(projectId) => {
+              setCurrentProjectId(projectId);
+              setActivePage("project-detail");
+            }}
           />
         );
 
@@ -28,10 +57,14 @@ function App() {
         if (!currentProjectId) {
           return null;
         }
-  
-        return <ProjectDetailPage
-          projectId={currentProjectId} 
-        />;
+
+        return (
+          <ProjectDetailPage
+            projectId={currentProjectId}
+            backTo={returnPage}
+            onBack={goBack}
+          />
+        );
 
       case "settings":
         return <SettingsPage />;
@@ -40,11 +73,8 @@ function App() {
       default:
         return (
           <DashboardPage
-            onNewProject={() => setActivePage("project-registration")}
-            onOpenProject={(projectId) => {
-              setCurrentProjectId(projectId);
-              setActivePage("project-detail");
-            }}
+            onNewProject={openProjectRegistration}
+            onOpenProject={openProjectDetail}
           />
         );
     }
@@ -52,9 +82,14 @@ function App() {
 
   return (
     <div className="app-layout">
-      <Sidebar activePage={activePage} onPageChange={setActivePage} />
+      <Sidebar
+        activePage={activePage}
+        onPageChange={setActivePage}
+      />
 
-      <main className="main-content">{renderPage()}</main>
+      <main className="main-content">
+        {renderPage()}
+      </main>
     </div>
   );
 }

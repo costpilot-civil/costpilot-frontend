@@ -15,11 +15,13 @@ import common from "../styles/common.module.css";
 import styles from "./project-registration-page.module.css";
 
 type ProjectRegistrationPageProps = {
+  backTo: "dashboard" | "projects";
   onCancel: () => void;
-  onCreated: () => void;
+  onCreated: (projectId: string) => void;
 };
 
 function ProjectRegistrationPage({
+  backTo,
   onCancel,
   onCreated,
 }: ProjectRegistrationPageProps) {
@@ -40,13 +42,24 @@ function ProjectRegistrationPage({
 
     const project = await createProject(projectData);
     console.log("Create project:", project);
-    onCreated();
+    onCreated(project.id);
   }
 
   return (
     <div className={common.page}>
       <header>
-        <Title order={2} className={common.pageTitle}>New Project</Title>
+        <Button
+          variant="subtle"
+          className={common.backButton}
+          onClick={onCancel}
+        >
+          ← Back to {backTo === "dashboard" ? "Dashboard" : "Projects"}
+        </Button>
+
+        <Title order={2} className={common.pageTitle}>
+          New Project
+        </Title>
+
         <Text className={common.pageSubtitle}>
           Create a new CostPilot project.
         </Text>

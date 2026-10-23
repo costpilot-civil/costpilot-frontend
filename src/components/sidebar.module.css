@@ -1,32 +1,31 @@
 .logo {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 7px 10px;
-  margin-bottom: 38px;
+  justify-content: center;
+
+  gap: 6px;
+  padding: 12px 8px;
+  margin-bottom: 28px;
+
   user-select: none;
-  white-space: nowrap;
 }
 
 .logoImage {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
-/* The logo icon remains an image; only the React-rendered name has a gradient. */
 .logoText {
-  font-size: 1.42rem;
+  font-size: 1.5rem;
   font-weight: 750;
   letter-spacing: -0.7px;
-  color: #007be4; /* fallback */
-  background: linear-gradient(90deg, #ffc32b 0%, #f6bd28 19%, #00c8f4 63%, #0078e8 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+  line-height: 1.2;
 
+  color: #075b9b;
+}
 .navigation {
   display: flex;
   flex-direction: column;

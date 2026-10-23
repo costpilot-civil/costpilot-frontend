@@ -18,9 +18,15 @@ import styles from "./project-detail-page.module.css";
 
 type ProjectDetailPageProps = {
   projectId: string | null;
+  backTo: "dashboard" | "projects";
+  onBack: () => void;
 };
 
-function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
+function ProjectDetailPage({
+  projectId,
+  backTo,
+  onBack,
+}: ProjectDetailPageProps) {
   console.log("Current project:", projectId);
   const [currentLv, setCurrentLv] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
@@ -61,7 +67,14 @@ function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
   return (
     <div className={common.page}>
       <header>
-        <Title order={2} className={common.pageTitle}>Project Detail</Title>
+        <Button variant="subtle" className={common.backButton} onClick={onBack}>
+          ← Back to {backTo === "dashboard" ? "Dashboard" : "Projects"}
+        </Button>
+
+        <Title order={2} className={common.pageTitle}>
+          Project Detail
+        </Title>
+
         <Text className={common.pageSubtitle}>
           Manage project information and Leistungsverzeichnis.
         </Text>
@@ -98,7 +111,9 @@ function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
             </Title>
             {currentLv ? (
               <>
-                <Text size="sm" c="dimmed">Current LV</Text>
+                <Text size="sm" c="dimmed">
+                  Current LV
+                </Text>
                 <Text className={styles.fileName}>{currentLvName}</Text>
               </>
             ) : (
@@ -106,9 +121,13 @@ function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
             )}
             {selectedFile && (
               <>
-                <Text size="sm" c="dimmed" mt="sm">Selected file</Text>
+                <Text size="sm" c="dimmed" mt="sm">
+                  Selected file
+                </Text>
                 <Text className={styles.fileName}>{selectedFileName}</Text>
-                <Text size="xs" className={styles.filePath}>{selectedFile}</Text>
+                <Text size="xs" className={styles.filePath}>
+                  {selectedFile}
+                </Text>
               </>
             )}
           </Stack>
