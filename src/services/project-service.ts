@@ -99,3 +99,56 @@ export async function getProjects(): Promise<Project[]> {
 
   return results.map(toProject);
 }
+
+// PATCH /projects/{project_id}
+export async function updateProject(
+  projectId: string,
+  changes: Partial<CreateProjectRequest>,
+): Promise<Project> {
+  const body: Record<string, string | null> = {};
+
+  if (changes.name !== undefined) {
+    body.name = changes.name.trim();
+  }
+
+  if (changes.projectNumber !== undefined) {
+    body.project_number = changes.projectNumber.trim() || null;
+  }
+
+  if (changes.client !== undefined) {
+    body.client = changes.client.trim() || null;
+  }
+
+  if (changes.location !== undefined) {
+    body.location = changes.location.trim() || null;
+  }
+
+  if (changes.description !== undefined) {
+    body.description = changes.description.trim() || null;
+  }
+
+  if (Object.keys(body).length === 0) {
+    throw new Error("No fields provided for update.");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/projects/${encodeURIComponent(projectId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to update project: ${response.status} ${await response.text()}`
+    );
+  }
+
+  const result: ProjectApiResponse = await response.json();
+
+  return toProject(result);
+}
