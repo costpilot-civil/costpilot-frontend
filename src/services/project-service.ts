@@ -1,9 +1,14 @@
+
+import { API_BASE_URL } from "../config/api";
+
 import type {
   CreateProjectRequest,
   Project,
 } from "../types/project";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+// --------------------------------------------------
+// Shared Types
+// --------------------------------------------------
 
 type ProjectApiResponse = {
   id: number;
@@ -16,7 +21,11 @@ type ProjectApiResponse = {
   updated_at: string;
 };
 
-// Convert Backend response to Frontend Project model
+// --------------------------------------------------
+// Helpers
+// --------------------------------------------------
+
+// Convert Backend response to Frontend Project model.
 function toProject(data: ProjectApiResponse): Project {
   return {
     id: String(data.id),
@@ -30,7 +39,12 @@ function toProject(data: ProjectApiResponse): Project {
   };
 }
 
+// --------------------------------------------------
+// Create Project
+// --------------------------------------------------
+
 // POST /projects
+// Create a new project and return its information.
 export async function createProject(
   data: CreateProjectRequest,
 ): Promise<Project> {
@@ -50,7 +64,7 @@ export async function createProject(
 
   if (!response.ok) {
     throw new Error(
-      `Failed to create project: ${response.status} ${await response.text()}`
+      `Failed to create project: ${response.status} ${await response.text()}`,
     );
   }
 
@@ -59,7 +73,12 @@ export async function createProject(
   return toProject(result);
 }
 
+// --------------------------------------------------
+// Get Project
+// --------------------------------------------------
+
 // GET /projects/{project_id}
+// Retrieve a single project by its ID.
 export async function getProject(
   projectId: string,
 ): Promise<Project> {
@@ -67,12 +86,12 @@ export async function getProject(
     `${API_BASE_URL}/projects/${encodeURIComponent(projectId)}`,
     {
       method: "GET",
-    }
+    },
   );
 
   if (!response.ok) {
     throw new Error(
-      `Failed to load project: ${response.status} ${await response.text()}`
+      `Failed to load project: ${response.status} ${await response.text()}`,
     );
   }
 
@@ -81,7 +100,12 @@ export async function getProject(
   return toProject(result);
 }
 
+// --------------------------------------------------
+// List Projects
+// --------------------------------------------------
+
 // GET /projects
+// Retrieve all projects.
 export async function getProjects(): Promise<Project[]> {
   const response = await fetch(`${API_BASE_URL}/projects`, {
     method: "GET",
@@ -89,7 +113,7 @@ export async function getProjects(): Promise<Project[]> {
 
   if (!response.ok) {
     throw new Error(
-      `Failed to load projects: ${response.status} ${await response.text()}`
+      `Failed to load projects: ${response.status} ${await response.text()}`,
     );
   }
 
@@ -98,7 +122,12 @@ export async function getProjects(): Promise<Project[]> {
   return results.map(toProject);
 }
 
+// --------------------------------------------------
+// Update Project
+// --------------------------------------------------
+
 // PATCH /projects/{project_id}
+// Update only the fields explicitly provided.
 export async function updateProject(
   projectId: string,
   changes: Partial<CreateProjectRequest>,
@@ -142,7 +171,7 @@ export async function updateProject(
 
   if (!response.ok) {
     throw new Error(
-      `Failed to update project: ${response.status} ${await response.text()}`
+      `Failed to update project: ${response.status} ${await response.text()}`,
     );
   }
 
@@ -151,7 +180,12 @@ export async function updateProject(
   return toProject(result);
 }
 
+// --------------------------------------------------
+// Delete Project
+// --------------------------------------------------
+
 // DELETE /projects/{project_id}
+// Delete a project by its ID.
 export async function deleteProject(
   projectId: string,
 ): Promise<void> {
@@ -164,7 +198,7 @@ export async function deleteProject(
 
   if (!response.ok) {
     throw new Error(
-      `Failed to delete project: ${response.status} ${await response.text()}`
+      `Failed to delete project: ${response.status} ${await response.text()}`,
     );
   }
 }

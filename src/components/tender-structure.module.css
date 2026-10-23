@@ -54,3 +54,24 @@
   font-size: 16px;
   line-height: 1;
 }
+
+/* A position may be opened from any cell; the Kurztext is also keyboard-accessible. */
+.table tbody tr[data-clickable="true"] { cursor: pointer; }
+.positionLink {
+  display: block;
+  max-width: 100%;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+.positionLink:hover { color: var(--cp-blue-strong); }
+.positionLink:focus-visible {
+  outline: 2px solid var(--cp-blue-strong);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.fullLongText {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.65;
+}
