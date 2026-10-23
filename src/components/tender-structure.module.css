@@ -30,10 +30,27 @@
 .table tbody tr[data-level="true"] { background-color: #eff7ff; }
 .table tbody tr[data-level="true"] td { font-weight: 650; }
 .longText { max-width: 490px; line-height: 1.45; }
-.actionButton {
-  white-space: nowrap;
-  color: #0076d4;
-  border: 1px solid #b6dbf6;
-  background: #eaf6ff;
+
+.categoryToggle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  max-width: 100%;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
-.actionButton:hover { background: #d9efff; }
+.categoryToggle:hover { color: var(--cp-blue-strong); }
+.categoryToggle:focus-visible {
+  outline: 2px solid var(--cp-blue-strong);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.chevron {
+  display: inline-block;
+  flex: 0 0 14px;
+  width: 14px;
+  color: var(--cp-blue-strong);
+  font-size: 16px;
+  line-height: 1;
+}

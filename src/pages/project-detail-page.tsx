@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Button,
@@ -12,12 +12,18 @@ import {
   Title,
 } from "@mantine/core";
 
-import { open } from "@tauri-apps/plugin-dialog";
+import TenderStructure from "../components/tender-structure";
+
+import {
+  importTender,
+  getTenders,
+  getTenderDetail,
+  type TenderDocument,
+  type TenderDetail,
+} from "../services/tender-service";
 
 import type { Project } from "../types/project";
 import { getProject, updateProject } from "../services/project-service";
-
-import LvStructure from "../components/lv-structure";
 
 import common from "../styles/common.module.css";
 import styles from "./project-detail-page.module.css";
@@ -62,8 +68,21 @@ function ProjectDetailPage({
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // Tender import state
-  const [currentLv, setCurrentLv] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [currentTender, setCurrentTender] = useState<TenderDocument | null>(
+    null,
+  );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [tenderLoading, setTenderLoading] = useState(false);
+
+  const [tenderError, setTenderError] = useState<string | null>(null);
+  const [tenderDetail, setTenderDetail] = useState<TenderDetail | null>(null);
+
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   // --------------------------------------------------
   // Load project
@@ -76,7 +95,7 @@ function ProjectDetailPage({
     setEditing(false);
     setError(null);
     setSaveError(null);
-    setCurrentLv(null);
+    setImportError(null);
     setSelectedFile(null);
 
     if (!projectId) {
@@ -113,6 +132,88 @@ function ProjectDetailPage({
       cancelled = true;
     };
   }, [projectId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setCurrentTender(null);
+    setTenderError(null);
+
+    if (!projectId) {
+      setTenderLoading(false);
+      return;
+    }
+
+    setTenderLoading(true);
+
+    async function loadTenders() {
+      try {
+        const tenders = await getTenders(projectId!);
+
+        if (!cancelled) {
+          setCurrentTender((current) => current ?? tenders[0] ?? null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setTenderError(
+            err instanceof Error ? err.message : "Failed to load tenders.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setTenderLoading(false);
+        }
+      }
+    }
+
+    void loadTenders();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setTenderDetail(null);
+    setDetailError(null);
+
+    if (!projectId || !currentTender || currentTender.status !== "PARSED") {
+      setDetailLoading(false);
+      return;
+    }
+
+    setDetailLoading(true);
+
+    async function loadTenderDetail() {
+      try {
+        const detail = await getTenderDetail(projectId!, currentTender!.id);
+
+        if (!cancelled) {
+          setTenderDetail(detail);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setDetailError(
+            err instanceof Error
+              ? err.message
+              : "Failed to load Tender Structure.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setDetailLoading(false);
+        }
+      }
+    }
+
+    void loadTenderDetail();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, currentTender?.id, currentTender?.status]);
 
   // --------------------------------------------------
   // Edit project
@@ -177,41 +278,32 @@ function ProjectDetailPage({
   // Tender import
   // --------------------------------------------------
 
-  async function handleSelectLv() {
-    const file = await open({
-      multiple: false,
-      directory: false,
-      filters: [
-        {
-          name: "Leistungsverzeichnis",
-          extensions: ["xml", "X83", "X81"],
-        },
-      ],
-    });
-
-    if (typeof file === "string") {
-      setSelectedFile(file);
-    }
+  function handleSelectLv() {
+    fileInputRef.current?.click();
   }
 
-  function handleImportLv() {
-    if (!selectedFile) {
+  async function handleImportLv() {
+    if (!projectId || !selectedFile || importing) {
       return;
     }
 
-    // TODO:
-    // Upload file to backend.
-    // Parse and save tender data.
-    // Load parsed tender structure.
+    setImporting(true);
+    setImportError(null);
 
-    console.log("Import LV:", selectedFile);
+    try {
+      const importedTender = await importTender(projectId, selectedFile);
 
-    setCurrentLv(selectedFile);
-    setSelectedFile(null);
+      setCurrentTender(importedTender);
+      setTenderError(null);
+      setSelectedFile(null);
+    } catch (err) {
+      setImportError(
+        err instanceof Error ? err.message : "Failed to import tender.",
+      );
+    } finally {
+      setImporting(false);
+    }
   }
-
-  const currentLvName = currentLv?.split(/[\\/]/).pop();
-  const selectedFileName = selectedFile?.split(/[\\/]/).pop();
 
   // --------------------------------------------------
   // Render
@@ -395,65 +487,113 @@ function ProjectDetailPage({
           {/* Tender Import */}
 
           <Card>
-            <Group justify="space-between" align="center" gap="lg">
-              <Stack gap="xs" className={styles.fileInfo}>
-                <Title order={3} className={common.sectionTitle}>
-                  Leistungsverzeichnis (Tender Import)
-                </Title>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xml,.x83,.x84,.x86"
+              hidden
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0] ?? null;
 
-                {currentLv ? (
-                  <>
-                    <Text size="sm" c="dimmed">
-                      Current LV
+                setSelectedFile(file);
+                setImportError(null);
+
+                event.currentTarget.value = "";
+              }}
+            />
+
+            <Stack gap="md">
+              <Group justify="space-between" align="center" gap="lg">
+                <Stack gap="xs" className={styles.fileInfo}>
+                  <Title order={3} className={common.sectionTitle}>
+                    Leistungsverzeichnis (Tender Import)
+                  </Title>
+
+                  {currentTender?.project_id === Number(projectId) ? (
+                    <>
+                      <Text size="sm" c="dimmed">
+                        Current Leistungsverzeichnis
+                      </Text>
+
+                      <Text className={styles.fileName}>
+                        {currentTender.file_name}
+                      </Text>
+
+                      <Text size="xs" c="dimmed">
+                        Status: {currentTender.status}
+                      </Text>
+                    </>
+                  ) : tenderLoading ? (
+                    <Text c="dimmed">Loading Leistungsverzeichnis...</Text>
+                  ) : tenderError ? (
+                    <Text c="red" size="sm">
+                      {tenderError}
                     </Text>
+                  ) : (
+                    <Text c="dimmed">No Leistungsverzeichnis imported.</Text>
+                  )}
 
-                    <Text className={styles.fileName}>{currentLvName}</Text>
-                  </>
-                ) : (
-                  <Text c="dimmed">No LV imported.</Text>
-                )}
+                  {selectedFile && (
+                    <>
+                      <Text size="sm" c="dimmed" mt="sm">
+                        Selected file
+                      </Text>
 
-                {selectedFile && (
-                  <>
-                    <Text size="sm" c="dimmed" mt="sm">
-                      Selected file
-                    </Text>
+                      <Text className={styles.fileName}>
+                        {selectedFile.name}
+                      </Text>
 
-                    <Text className={styles.fileName}>{selectedFileName}</Text>
+                      <Text size="xs" c="dimmed">
+                        {(selectedFile.size / 1024).toFixed(1)} KB
+                      </Text>
+                    </>
+                  )}
+                </Stack>
 
-                    <Text size="xs" className={styles.filePath}>
-                      {selectedFile}
-                    </Text>
-                  </>
-                )}
-              </Stack>
+                <div className={styles.fileActions}>
+                  <Button
+                    className={common.secondaryButton}
+                    onClick={handleSelectLv}
+                    disabled={importing}
+                  >
+                    Select File
+                  </Button>
 
-              <div className={styles.fileActions}>
-                <Button
-                  className={common.secondaryButton}
-                  onClick={handleSelectLv}
-                >
-                  {currentLv ? "Change File" : "Select File"}
-                </Button>
+                  <Button
+                    className={common.primaryButton}
+                    disabled={!selectedFile || !projectId}
+                    loading={importing}
+                    onClick={handleImportLv}
+                  >
+                    Import LV
+                  </Button>
+                </div>
+              </Group>
 
-                <Button
-                  className={common.primaryButton}
-                  disabled={!selectedFile}
-                  onClick={handleImportLv}
-                >
-                  Import LV
-                </Button>
-              </div>
-            </Group>
+              {importError && (
+                <Text c="red" size="sm" role="alert">
+                  {importError}
+                </Text>
+              )}
+            </Stack>
           </Card>
-
-          {/* Tender Structure */}
-
-          {currentLv && <LvStructure />}
         </>
       ) : (
         <Text c="dimmed">Project not found.</Text>
       )}
+      {detailLoading && <Text c="dimmed">Loading Tender Structure...</Text>}
+
+      {detailError && (
+        <Text c="red" role="alert">
+          {detailError}
+        </Text>
+      )}
+
+      {tenderDetail &&
+        tenderDetail.document.id === currentTender?.id &&
+        tenderDetail.document.project_id === Number(projectId) && (
+          <TenderStructure detail={tenderDetail} />
+        )}
     </div>
   );
 }

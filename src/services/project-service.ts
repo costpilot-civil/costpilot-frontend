@@ -27,8 +27,6 @@ function toProject(data: ProjectApiResponse): Project {
     description: data.description ?? undefined,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
-    lvDocument: null,
-    positions: [],
   };
 }
 

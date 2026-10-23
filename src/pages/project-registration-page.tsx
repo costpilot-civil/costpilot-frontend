@@ -1,13 +1,6 @@
 import { useState } from "react";
 
-import {
-  Button,
-  Stack,
-  Text,
-  TextInput,
-  Textarea,
-  Title,
-} from "@mantine/core";
+import { Button, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
 
 import type { CreateProjectRequest } from "../types/project";
 import { createProject } from "../services/project-service";
@@ -30,19 +23,38 @@ function ProjectRegistrationPage({
   const [client, setClient] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   async function handleCreate() {
+    const name = projectName.trim();
+
+    if (!name || creating) {
+      return;
+    }
+
     const projectData: CreateProjectRequest = {
-      name: projectName,
-      projectNumber,
-      client,
-      location,
-      description,
+      name,
+      projectNumber: projectNumber.trim(),
+      client: client.trim(),
+      location: location.trim(),
+      description: description.trim(),
     };
 
-    const project = await createProject(projectData);
-    console.log("Create project:", project);
-    onCreated(project.id);
+    setCreating(true);
+    setCreateError(null);
+
+    try {
+      const project = await createProject(projectData);
+
+      onCreated(project.id);
+    } catch (err) {
+      setCreateError(
+        err instanceof Error ? err.message : "Failed to create project.",
+      );
+    } finally {
+      setCreating(false);
+    }
   }
 
   return (
@@ -52,6 +64,7 @@ function ProjectRegistrationPage({
           variant="subtle"
           className={common.backButton}
           onClick={onCancel}
+          disabled={creating}
         >
           ← Back to {backTo === "dashboard" ? "Dashboard" : "Projects"}
         </Button>
@@ -101,11 +114,27 @@ function ProjectRegistrationPage({
           />
         </Stack>
 
+        {createError && (
+          <Text c="red" size="sm" mt="md" role="alert">
+            {createError}
+          </Text>
+        )}
+
         <div className={styles.actions}>
-          <Button className={common.neutralButton} onClick={onCancel}>
+          <Button
+            className={common.neutralButton}
+            onClick={onCancel}
+            disabled={creating}
+          >
             Cancel
           </Button>
-          <Button className={common.primaryButton} onClick={handleCreate}>
+
+          <Button
+            className={common.primaryButton}
+            onClick={handleCreate}
+            loading={creating}
+            disabled={!projectName.trim()}
+          >
             Create Project
           </Button>
         </div>

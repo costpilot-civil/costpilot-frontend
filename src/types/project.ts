@@ -1,10 +1,3 @@
-import type { LvRow } from "./lv";
-
-export type LvDocument = {
-  id: string;
-  fileName: string;
-};
-
 export type Project = {
   id: string;
   name: string;
@@ -15,9 +8,6 @@ export type Project = {
 
   createdAt: string;
   updatedAt: string;
-  
-  lvDocument: LvDocument | null;
-  positions: LvRow[];
 };
 
 export type CreateProjectRequest = {
