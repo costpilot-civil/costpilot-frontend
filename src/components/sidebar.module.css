@@ -1,0 +1,100 @@
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  margin-bottom: 38px;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.logoImage {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  object-fit: contain;
+}
+
+/* The logo icon remains an image; only the React-rendered name has a gradient. */
+.logoText {
+  font-size: 1.42rem;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+  color: #007be4; /* fallback */
+  background: linear-gradient(90deg, #ffc32b 0%, #f6bd28 19%, #00c8f4 63%, #0078e8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 13px;
+  padding: 13px 14px;
+  color: #3a5473;
+  font-size: 1rem;
+  font-weight: 550;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.navButton:hover:not([data-active="true"]) {
+  color: #0069c3;
+  background: rgba(210, 234, 252, 0.74);
+}
+
+/* Active row: yellow background, navy text, bright-blue leading icon. */
+.navButton[data-active="true"] {
+  position: relative;
+  color: #16304d;
+  border-color: #f0cd50;
+  background: linear-gradient(90deg, #ffe688 0%, #ffd43b 100%);
+  box-shadow: 0 3px 10px rgba(202, 151, 24, 0.10);
+  font-weight: 700;
+}
+
+.navButton[data-active="true"]::before {
+  position: absolute;
+  top: 9px;
+  bottom: 9px;
+  left: -1px;
+  width: 4px;
+  content: "";
+  border-radius: 0 5px 5px 0;
+  background: #0079e4;
+}
+
+.navIcon {
+  display: inline-flex;
+  flex: 0 0 21px;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.navButton[data-active="true"] .navIcon { color: #0079e4; }
+
+.navLabel {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 570px) {
+  .logo { justify-content: center; padding-inline: 0; }
+  .logoImage { width: 44px; height: 44px; flex-basis: 44px; }
+  .logoText, .navLabel { display: none; }
+  .navButton { justify-content: center; padding: 13px 0; }
+}

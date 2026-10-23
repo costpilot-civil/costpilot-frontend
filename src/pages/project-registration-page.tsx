@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import {
   Button,
-  Group,
   Stack,
   Text,
   TextInput,
@@ -12,6 +11,8 @@ import {
 
 import type { CreateProjectRequest } from "../types/project";
 import { createProject } from "../services/project-service";
+import common from "../styles/common.module.css";
+import styles from "./project-registration-page.module.css";
 
 type ProjectRegistrationPageProps = {
   onCancel: () => void;
@@ -38,85 +39,65 @@ function ProjectRegistrationPage({
     };
 
     const project = await createProject(projectData);
-
     console.log("Create project:", project);
-
     onCreated();
   }
 
   return (
-    <Stack gap="lg">
-      <div>
-        <Title order={2}>New Project</Title>
-
-        <Text c="dimmed" mt="xs">
+    <div className={common.page}>
+      <header>
+        <Title order={2} className={common.pageTitle}>New Project</Title>
+        <Text className={common.pageSubtitle}>
           Create a new CostPilot project.
         </Text>
+      </header>
+
+      <div className={styles.formPanel}>
+        <Stack gap="lg" className={styles.formFields}>
+          <TextInput
+            label="Project Name"
+            placeholder="e.g. Frankfurt Hbf"
+            required
+            value={projectName}
+            onChange={(event) => setProjectName(event.currentTarget.value)}
+          />
+          <TextInput
+            label="Project Number"
+            placeholder="Optional"
+            value={projectNumber}
+            onChange={(event) => setProjectNumber(event.currentTarget.value)}
+          />
+          <TextInput
+            label="Client"
+            placeholder="Optional"
+            value={client}
+            onChange={(event) => setClient(event.currentTarget.value)}
+          />
+          <TextInput
+            label="Location"
+            placeholder="Optional"
+            value={location}
+            onChange={(event) => setLocation(event.currentTarget.value)}
+          />
+          <Textarea
+            label="Description"
+            placeholder="Optional project description"
+            minRows={4}
+            value={description}
+            onChange={(event) => setDescription(event.currentTarget.value)}
+          />
+        </Stack>
+
+        <div className={styles.actions}>
+          <Button className={common.neutralButton} onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button className={common.primaryButton} onClick={handleCreate}>
+            Create Project
+          </Button>
+        </div>
       </div>
-
-      <TextInput
-        label="Project Name"
-        placeholder="e.g. Frankfurt Hbf"
-        required
-        value={projectName}
-        onChange={(event) =>
-          setProjectName(event.currentTarget.value)
-        }
-      />
-
-      <TextInput
-        label="Project Number"
-        placeholder="Optional"
-        value={projectNumber}
-        onChange={(event) =>
-          setProjectNumber(event.currentTarget.value)
-        }
-      />
-
-      <TextInput
-        label="Client"
-        placeholder="Optional"
-        value={client}
-        onChange={(event) =>
-          setClient(event.currentTarget.value)
-        }
-      />
-
-      <TextInput
-        label="Location"
-        placeholder="Optional"
-        value={location}
-        onChange={(event) =>
-          setLocation(event.currentTarget.value)
-        }
-      />
-
-      <Textarea
-        label="Description"
-        placeholder="Optional project description"
-        minRows={4}
-        value={description}
-        onChange={(event) =>
-          setDescription(event.currentTarget.value)
-        }
-      />
-
-      <Group justify="flex-end">
-        <Button
-          variant="default"
-          onClick={onCancel}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          color="blue"
-          onClick={handleCreate}
-        >
-          Create Project
-        </Button>
-      </Group>
-    </Stack>
+    </div>
   );
 }
 

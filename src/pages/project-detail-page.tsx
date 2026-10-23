@@ -13,6 +13,8 @@ import {
 import { open } from "@tauri-apps/plugin-dialog";
 
 import LvStructure from "../components/lv-structure";
+import common from "../styles/common.module.css";
+import styles from "./project-detail-page.module.css";
 
 type ProjectDetailPageProps = {
   projectId: string | null;
@@ -48,13 +50,7 @@ function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
 
     console.log("Import LV:", selectedFile);
 
-    // TODO:
-    // Later:
-    // 1. Upload file to backend
-    // 2. Parse LV
-    // 3. Save LV and positions
-    // 4. Load parsed LV data
-
+    // TODO: Upload file to backend, parse it and load imported positions.
     setCurrentLv(selectedFile);
     setSelectedFile(null);
   }
@@ -63,99 +59,77 @@ function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
   const selectedFileName = selectedFile?.split(/[\\/]/).pop();
 
   return (
-    <Stack gap="xl">
-      <div>
-        <Title order={2}>Project Detail</Title>
-
-        <Text c="dimmed" mt="xs">
+    <div className={common.page}>
+      <header>
+        <Title order={2} className={common.pageTitle}>Project Detail</Title>
+        <Text className={common.pageSubtitle}>
           Manage project information and Leistungsverzeichnis.
         </Text>
-      </div>
+      </header>
 
-      <Card withBorder radius="md" padding="lg">
+      <Card>
         <Stack gap="md">
-          <Title order={3}>Project Information</Title>
-
-          <Divider />
-
-          <Group gap="xl">
+          <Title order={3} className={common.sectionTitle}>
+            Project Information
+          </Title>
+          <Divider color="dark.6" />
+          <div className={styles.infoGrid}>
             <div>
-              <Text size="sm" c="dimmed">
-                Project Name
-              </Text>
-
-              <Text fw={500}>Frankfurt Hbf</Text>
+              <Text className={styles.infoLabel}>Project Name</Text>
+              <Text className={styles.infoValue}>Frankfurt Hbf</Text>
             </div>
-
             <div>
-              <Text size="sm" c="dimmed">
-                Project Number
-              </Text>
-
-              <Text fw={500}>P-001</Text>
+              <Text className={styles.infoLabel}>Project Number</Text>
+              <Text className={styles.infoValue}>P-001</Text>
             </div>
-
             <div>
-              <Text size="sm" c="dimmed">
-                Client
-              </Text>
-
-              <Text fw={500}>DB InfraGO</Text>
+              <Text className={styles.infoLabel}>Client</Text>
+              <Text className={styles.infoValue}>DB InfraGO</Text>
             </div>
-          </Group>
+          </div>
         </Stack>
       </Card>
 
-      <Card withBorder radius="md" padding="lg">
-        <Group justify="space-between" align="flex-end">
-          <Stack gap="xs">
-            <Title order={3}>Leistungsverzeichnis</Title>
-
+      <Card>
+        <Group justify="space-between" align="center" gap="lg">
+          <Stack gap="xs" className={styles.fileInfo}>
+            <Title order={3} className={common.sectionTitle}>
+              Leistungsverzeichnis (Tender Import)
+            </Title>
             {currentLv ? (
               <>
-                <Text size="sm" c="dimmed">
-                  Current LV
-                </Text>
-
-                <Text fw={500}>{currentLvName}</Text>
+                <Text size="sm" c="dimmed">Current LV</Text>
+                <Text className={styles.fileName}>{currentLvName}</Text>
               </>
             ) : (
               <Text c="dimmed">No LV imported.</Text>
             )}
-
             {selectedFile && (
               <>
-                <Text size="sm" c="dimmed" mt="sm">
-                  Selected file
-                </Text>
-
-                <Text fw={500}>{selectedFileName}</Text>
-
-                <Text size="sm" c="dimmed">
-                  {selectedFile}
-                </Text>
+                <Text size="sm" c="dimmed" mt="sm">Selected file</Text>
+                <Text className={styles.fileName}>{selectedFileName}</Text>
+                <Text size="xs" className={styles.filePath}>{selectedFile}</Text>
               </>
             )}
           </Stack>
 
-          <Group>
-            <Button variant="default" onClick={handleSelectLv}>
+          <div className={styles.fileActions}>
+            <Button className={common.secondaryButton} onClick={handleSelectLv}>
               {currentLv ? "Change File" : "Select File"}
             </Button>
-
             <Button
-              color="blue"
+              className={common.primaryButton}
               disabled={!selectedFile}
               onClick={handleImportLv}
             >
               Import LV
             </Button>
-          </Group>
+          </div>
         </Group>
       </Card>
 
       {currentLv && <LvStructure />}
-    </Stack>
+    </div>
   );
 }
 

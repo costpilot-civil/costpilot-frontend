@@ -1,24 +1,36 @@
 :root {
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  color-scheme: light;
 
-  color-scheme: dark;
+  /* Brand colors */
+  --cp-blue: #009fea;
+  --cp-blue-strong: #0079e4;
+  --cp-cyan: #00c7ec;
+  --cp-yellow: #ffd43b;
+  --cp-yellow-hover: #ffe16a;
+  --cp-on-yellow: #10233d;
 
-  --app-bg: #18181b;
-  --sidebar-bg: #202124;
-  --sidebar-border: #303238;
-  --content-bg: #18181b;
+  /* Light application surfaces */
+  --cp-bg: #f5faff;
+  --cp-sidebar-bg: #eef7ff;
+  --cp-surface: #ffffff;
+  --cp-surface-raised: #fbfdff;
+  --cp-surface-hover: #eaf5ff;
+  --cp-border: #d9e8f6;
+  --cp-border-bright: #b8d4ec;
+  --cp-text: #14213e;
+  --cp-text-muted: #657999;
+  --cp-success: #0a9565;
+  --cp-warning: #b37800;
+  --cp-danger: #d73d54;
 
-  --text-primary: #f4f4f5;
-  --text-muted: #a1a1aa;
+  --cp-sidebar-width: 244px;
+  --cp-content-padding: 32px;
+  --cp-shadow: 0 8px 24px rgba(35, 91, 148, 0.065);
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -31,64 +43,149 @@ body,
 }
 
 body {
-  min-width: 320px;
+  min-width: 360px;
   overflow: hidden;
-
-  color: var(--text-primary);
-  background: var(--app-bg);
+  background: var(--cp-bg);
+  color: var(--cp-text);
 }
 
-/* Application layout */
+button,
+input,
+textarea {
+  font: inherit;
+}
 
+/* Keep app.tsx's existing class names; no navigation changes needed. */
 .app-layout {
   display: flex;
   width: 100%;
   height: 100vh;
-  background: var(--app-bg);
+  height: 100dvh;
+  min-height: 0;
+  background: var(--cp-bg);
 }
-
-/* Sidebar */
 
 .sidebar {
-  width: 240px;
-  flex-shrink: 0;
-
-  padding: 24px 16px;
-
-  background: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  width: var(--cp-sidebar-width);
+  flex: 0 0 var(--cp-sidebar-width);
+  min-height: 0;
+  overflow: hidden;
+  padding: 28px 16px 24px;
+  border-right: 1px solid var(--cp-border);
+  background: linear-gradient(180deg, #edf7ff 0%, #f5faff 43%, #eaf6ff 100%);
 }
 
-/* Main content */
+/* Existing image only. No new image is included with this package. */
+.sidebar::before {
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 69%;
+  content: "";
+  pointer-events: none;
+  background-image: url("../assets/images/sidebar-construction.png");
+  background-position: center bottom;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.82;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.30) 19%, #000 43%, #000 88%, rgba(0, 0, 0, 0.78) 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.30) 19%, #000 43%, #000 88%, rgba(0, 0, 0, 0.78) 100%);
+}
 
 .main-content {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
   height: 100%;
-
-  padding: 32px;
-
+  overflow-x: auto;
   overflow-y: auto;
-
-  background: var(--content-bg);
+  padding: var(--cp-content-padding);
+  background:
+    radial-gradient(ellipse 60% 35% at 85% 0%, rgba(179, 225, 255, 0.19), transparent 85%),
+    linear-gradient(145deg, #ffffff 0%, #f8fbff 43%, #f0f8ff 100%);
 }
 
-/* Scrollbar */
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Mantine component defaults on white surfaces */
+.mantine-Card-root,
+.mantine-Paper-root {
+  background: var(--cp-surface);
+  border-color: var(--cp-border);
+  box-shadow: var(--cp-shadow);
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+.mantine-Input-input,
+.mantine-Textarea-input,
+.mantine-Select-input {
+  background-color: #ffffff;
+  border-color: var(--cp-border-bright);
+  color: var(--cp-text);
 }
 
+.mantine-Input-input::placeholder,
+.mantine-Textarea-input::placeholder {
+  color: #8698ae;
+}
+
+.mantine-Input-input:focus,
+.mantine-Textarea-input:focus,
+.mantine-Select-input:focus {
+  border-color: var(--cp-blue-strong);
+}
+
+.mantine-InputWrapper-label {
+  margin-bottom: 5px;
+  color: var(--cp-text);
+  font-weight: 600;
+}
+
+.mantine-Table-table { border-color: var(--cp-border); }
+.mantine-Table-th {
+  background: #ecf6ff;
+  color: #365271;
+  border-color: var(--cp-border);
+  font-weight: 600;
+}
+.mantine-Table-td { border-color: #e8f0f8; }
+.mantine-Divider-root { --divider-color: var(--cp-border); }
+
+::selection {
+  background: #b4eaff;
+  color: var(--cp-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--cp-blue-strong);
+  outline-offset: 3px;
+}
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  border: 2px solid transparent;
   border-radius: 999px;
+  background: #bad2e9;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: #91bee3; }
+
+@media (max-width: 850px) {
+  :root { --cp-sidebar-width: 190px; --cp-content-padding: 22px; }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+@media (max-width: 570px) {
+  :root { --cp-sidebar-width: 74px; --cp-content-padding: 16px; }
+  .sidebar { padding-inline: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

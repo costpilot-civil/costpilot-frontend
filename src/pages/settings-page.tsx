@@ -1,13 +1,15 @@
 import { Text, Title } from "@mantine/core";
 
+import common from "../styles/common.module.css";
+
 function SettingsPage() {
   return (
-    <>
-      <Title order={2}>Settings</Title>
-      <Text c="dimmed" mt="xs">
-        Configure CostPilot.
-      </Text>
-    </>
+    <div className={common.page}>
+      <header>
+        <Title order={2} className={common.pageTitle}>Settings</Title>
+        <Text className={common.pageSubtitle}>Configure CostPilot.</Text>
+      </header>
+    </div>
   );
 }
 

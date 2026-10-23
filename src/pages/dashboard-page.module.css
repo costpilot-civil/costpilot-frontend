@@ -1,0 +1,53 @@
+.sectionHeader { margin-bottom: 16px; }
+.projectGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.projectCard {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--cp-border);
+  background: #fff;
+  cursor: pointer;
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+.projectCard:hover {
+  transform: translateY(-2px);
+  border-color: #91cef6;
+  box-shadow: 0 12px 28px rgba(35, 102, 171, 0.12);
+}
+.projectCard:focus-visible { outline: 2px solid var(--cp-blue-strong); outline-offset: 3px; }
+.projectVisual {
+  position: relative;
+  height: 150px;
+  background-color: #c7eaff;
+  background-image:
+    linear-gradient(180deg, rgba(231, 246, 255, 0.02), rgba(235, 247, 255, 0.10)),
+    url("../assets/images/sidebar-construction.png");
+  background-size: cover;
+  background-position: center 48%;
+}
+.projectCard:nth-child(even) .projectVisual {
+  background-position: center 74%;
+}
+.projectContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 17px 19px 18px;
+}
+.projectName { font-size: 1.13rem; color: var(--cp-text); }
+.projectFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e8eff8;
+}
+.projectCount { color: var(--cp-text-muted); }
+@media (max-width: 890px) {
+  .projectGrid { grid-template-columns: 1fr; }
+}

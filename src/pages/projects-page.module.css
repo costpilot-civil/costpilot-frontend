@@ -1,0 +1,13 @@
+.emptyPanel {
+  min-height: 220px;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 32px;
+  color: var(--cp-text-muted);
+  border: 1px dashed var(--cp-border-bright);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: var(--cp-shadow);
+  text-align: center;
+}
