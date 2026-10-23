@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Project } from "../types/project";
+import { getProject } from "../services/project-service";
 
 import {
   Button,
@@ -30,6 +32,9 @@ function ProjectDetailPage({
   console.log("Current project:", projectId);
   const [currentLv, setCurrentLv] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSelectLv() {
     const file = await open({
@@ -64,6 +69,44 @@ function ProjectDetailPage({
   const currentLvName = currentLv?.split(/[\\/]/).pop();
   const selectedFileName = selectedFile?.split(/[\\/]/).pop();
 
+  useEffect(() => {
+    if (!projectId) {
+      setProject(null);
+      setError("Project ID is missing.");
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    setLoading(true);
+    setError(null);
+    setProject(null);
+
+    getProject(projectId)
+      .then((data) => {
+        if (!cancelled) {
+          setProject(data);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load project.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
   return (
     <div className={common.page}>
       <header>
@@ -72,7 +115,7 @@ function ProjectDetailPage({
         </Button>
 
         <Title order={2} className={common.pageTitle}>
-          Project Detail
+          {project?.name ?? "Project Detail"}
         </Title>
 
         <Text className={common.pageSubtitle}>
@@ -80,28 +123,56 @@ function ProjectDetailPage({
         </Text>
       </header>
 
-      <Card>
-        <Stack gap="md">
-          <Title order={3} className={common.sectionTitle}>
-            Project Information
-          </Title>
-          <Divider color="dark.6" />
-          <div className={styles.infoGrid}>
-            <div>
-              <Text className={styles.infoLabel}>Project Name</Text>
-              <Text className={styles.infoValue}>Frankfurt Hbf</Text>
+      {loading ? (
+        <Text c="dimmed">Loading project...</Text>
+      ) : error ? (
+        <Text c="red">{error}</Text>
+      ) : project ? (
+        <Card>
+          <Stack gap="md">
+            <Title order={3} className={common.sectionTitle}>
+              Project Information
+            </Title>
+
+            <Divider />
+
+            <div className={styles.infoGrid}>
+              <div>
+                <Text className={styles.infoLabel}>Project Name</Text>
+                <Text className={styles.infoValue}>{project.name}</Text>
+              </div>
+
+              <div>
+                <Text className={styles.infoLabel}>Project Number</Text>
+                <Text className={styles.infoValue}>
+                  {project.projectNumber || "—"}
+                </Text>
+              </div>
+
+              <div>
+                <Text className={styles.infoLabel}>Client</Text>
+                <Text className={styles.infoValue}>
+                  {project.client || "—"}
+                </Text>
+              </div>
+
+              <div>
+                <Text className={styles.infoLabel}>Location</Text>
+                <Text className={styles.infoValue}>
+                  {project.location || "—"}
+                </Text>
+              </div>
+
+              <div>
+                <Text className={styles.infoLabel}>Description</Text>
+                <Text className={styles.infoValue}>
+                  {project.description || "—"}
+                </Text>
+              </div>
             </div>
-            <div>
-              <Text className={styles.infoLabel}>Project Number</Text>
-              <Text className={styles.infoValue}>P-001</Text>
-            </div>
-            <div>
-              <Text className={styles.infoLabel}>Client</Text>
-              <Text className={styles.infoValue}>DB InfraGO</Text>
-            </div>
-          </div>
-        </Stack>
-      </Card>
+          </Stack>
+        </Card>
+      ) : null}
 
       <Card>
         <Group justify="space-between" align="center" gap="lg">
