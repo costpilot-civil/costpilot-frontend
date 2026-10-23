@@ -6,6 +6,7 @@ import {
   Group,
   Table,
   Text,
+  TextInput,
   Title,
 } from "@mantine/core";
 
@@ -19,13 +20,11 @@ type ProjectsPageProps = {
   onOpenProject: (projectId: string) => void;
 };
 
-function ProjectsPage({
-  onNewProject,
-  onOpenProject,
-}: ProjectsPageProps) {
+function ProjectsPage({ onNewProject, onOpenProject }: ProjectsPageProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -40,9 +39,7 @@ function ProjectsPage({
       } catch (err) {
         if (!cancelled) {
           setError(
-            err instanceof Error
-              ? err.message
-              : "Failed to load projects."
+            err instanceof Error ? err.message : "Failed to load projects.",
           );
         }
       } finally {
@@ -59,6 +56,17 @@ function ProjectsPage({
     };
   }, []);
 
+  const query = search.trim().toLowerCase();
+
+  const filteredProjects = projects.filter((project) =>
+    [
+      project.name,
+      project.projectNumber,
+      project.client,
+      project.location,
+    ].some((value) => (value ?? "").toLowerCase().includes(query)),
+  );
+
   return (
     <div className={common.page}>
       <header className={common.pageHeader}>
@@ -72,13 +80,19 @@ function ProjectsPage({
           </Text>
         </div>
 
-        <Button
-          className={common.primaryButton}
-          onClick={onNewProject}
-        >
+        <Button className={common.primaryButton} onClick={onNewProject}>
           + New Project
         </Button>
       </header>
+
+      <TextInput
+        placeholder="Search projects by name, number, client or location..."
+        aria-label="Search projects"
+        value={search}
+        onChange={(event) => setSearch(event.currentTarget.value)}
+        disabled={loading || error !== null}
+        w="100%"
+      />
 
       <Card withBorder radius="md" padding="lg">
         {loading ? (
@@ -86,16 +100,12 @@ function ProjectsPage({
         ) : error ? (
           <Text c="red">{error}</Text>
         ) : projects.length === 0 ? (
-          <Text c="dimmed">
-            No projects found.
-          </Text>
+          <Text c="dimmed">No projects found.</Text>
+        ) : filteredProjects.length === 0 ? (
+          <Text c="dimmed">No matching projects.</Text>
         ) : (
           <Table.ScrollContainer minWidth={800}>
-            <Table
-              striped
-              highlightOnHover
-              verticalSpacing="md"
-            >
+            <Table striped highlightOnHover verticalSpacing="md">
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Project Name</Table.Th>
@@ -108,28 +118,20 @@ function ProjectsPage({
               </Table.Thead>
 
               <Table.Tbody>
-                {projects.map((project) => (
+                {filteredProjects.map((project) => (
                   <Table.Tr key={project.id}>
                     <Table.Td>
                       <Text fw={600}>{project.name}</Text>
                     </Table.Td>
 
-                    <Table.Td>
-                      {project.projectNumber || "—"}
-                    </Table.Td>
+                    <Table.Td>{project.projectNumber || "—"}</Table.Td>
+
+                    <Table.Td>{project.client || "—"}</Table.Td>
+
+                    <Table.Td>{project.location || "—"}</Table.Td>
 
                     <Table.Td>
-                      {project.client || "—"}
-                    </Table.Td>
-
-                    <Table.Td>
-                      {project.location || "—"}
-                    </Table.Td>
-
-                    <Table.Td>
-                      {new Date(
-                        project.createdAt
-                      ).toLocaleDateString("de-DE")}
+                      {new Date(project.createdAt).toLocaleDateString("de-DE")}
                     </Table.Td>
 
                     <Table.Td>
@@ -137,9 +139,7 @@ function ProjectsPage({
                         variant="light"
                         color="blue"
                         size="xs"
-                        onClick={() =>
-                          onOpenProject(project.id)
-                        }
+                        onClick={() => onOpenProject(project.id)}
                       >
                         Open
                       </Button>
