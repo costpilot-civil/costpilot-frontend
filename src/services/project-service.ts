@@ -152,3 +152,21 @@ export async function updateProject(
 
   return toProject(result);
 }
+
+// DELETE /projects/{project_id}
+export async function deleteProject(
+  projectId: string,
+): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/projects/${encodeURIComponent(projectId)}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to delete project: ${response.status} ${await response.text()}`
+    );
+  }
+}

@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   Group,
+  Modal,
   Table,
   Text,
   TextInput,
@@ -11,7 +12,7 @@ import {
 } from "@mantine/core";
 
 import type { Project } from "../types/project";
-import { getProjects } from "../services/project-service";
+import { getProjects, deleteProject } from "../services/project-service";
 
 import common from "../styles/common.module.css";
 
@@ -25,6 +26,11 @@ function ProjectsPage({ onNewProject, onOpenProject }: ProjectsPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+
+  const [deleting, setDeleting] = useState(false);
+
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,6 +72,41 @@ function ProjectsPage({ onNewProject, onOpenProject }: ProjectsPageProps) {
       project.location,
     ].some((value) => (value ?? "").toLowerCase().includes(query)),
   );
+
+  function handleStartDelete(project: Project) {
+    setProjectToDelete(project);
+    setDeleteError(null);
+  }
+
+  function handleCancelDelete() {
+    if (deleting) return;
+
+    setProjectToDelete(null);
+    setDeleteError(null);
+  }
+
+  async function handleConfirmDelete() {
+    if (!projectToDelete || deleting) return;
+
+    setDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await deleteProject(projectToDelete.id);
+
+      setProjects((prev) =>
+        prev.filter((project) => project.id !== projectToDelete.id),
+      );
+
+      setProjectToDelete(null);
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ? err.message : "Failed to delete project.",
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <div className={common.page}>
@@ -135,14 +176,25 @@ function ProjectsPage({ onNewProject, onOpenProject }: ProjectsPageProps) {
                     </Table.Td>
 
                     <Table.Td>
-                      <Button
-                        variant="light"
-                        color="blue"
-                        size="xs"
-                        onClick={() => onOpenProject(project.id)}
-                      >
-                        Open
-                      </Button>
+                      <Group gap="xs" wrap="nowrap">
+                        <Button
+                          variant="light"
+                          color="blue"
+                          size="xs"
+                          onClick={() => onOpenProject(project.id)}
+                        >
+                          Open
+                        </Button>
+
+                        <Button
+                          variant="light"
+                          color="red"
+                          size="xs"
+                          onClick={() => handleStartDelete(project)}
+                        >
+                          Delete
+                        </Button>
+                      </Group>
                     </Table.Td>
                   </Table.Tr>
                 ))}
@@ -151,6 +203,48 @@ function ProjectsPage({ onNewProject, onOpenProject }: ProjectsPageProps) {
           </Table.ScrollContainer>
         )}
       </Card>
+
+      <Modal
+        opened={projectToDelete !== null}
+        onClose={handleCancelDelete}
+        title="Delete Project"
+        centered
+        closeOnClickOutside={!deleting}
+        closeOnEscape={!deleting}
+        withCloseButton={!deleting}
+      >
+        <Text size="sm">
+          Are you sure you want to delete{" "}
+          <Text span fw={700}>
+            {projectToDelete?.name}
+          </Text>
+          ?
+        </Text>
+
+        <Text size="sm" c="dimmed" mt="xs">
+          This action cannot be undone.
+        </Text>
+
+        {deleteError && (
+          <Text c="red" size="sm" mt="md" role="alert">
+            {deleteError}
+          </Text>
+        )}
+
+        <Group justify="flex-end" mt="lg">
+          <Button
+            variant="default"
+            onClick={handleCancelDelete}
+            disabled={deleting}
+          >
+            Cancel
+          </Button>
+
+          <Button color="red" loading={deleting} onClick={handleConfirmDelete}>
+            Delete Project
+          </Button>
+        </Group>
+      </Modal>
     </div>
   );
 }
