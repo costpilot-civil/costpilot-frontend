@@ -80,3 +80,20 @@ export async function getProject(
 
   return toProject(result);
 }
+
+// GET /projects
+export async function getProjects(): Promise<Project[]> {
+  const response = await fetch(`${API_BASE_URL}/projects`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load projects: ${response.status} ${await response.text()}`
+    );
+  }
+
+  const results: ProjectApiResponse[] = await response.json();
+
+  return results.map(toProject);
+}
