@@ -13,6 +13,9 @@ export type Project = {
   location?: string;
   description?: string;
 
+  createdAt: string;
+  updatedAt: string;
+  
   lvDocument: LvDocument | null;
   positions: LvRow[];
 };

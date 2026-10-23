@@ -39,7 +39,12 @@ function App() {
   function renderPage() {
     switch (activePage) {
       case "projects":
-        return <ProjectsPage />;
+        return (
+          <ProjectsPage
+            onNewProject={openProjectRegistration}
+            onOpenProject={openProjectDetail}
+          />
+        );
 
       case "project-registration":
         return (
